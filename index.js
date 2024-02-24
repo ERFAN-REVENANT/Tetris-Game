@@ -1,10 +1,10 @@
 window.onload = () => {
-    const background = document.getElementById("background"),
-    scoreLbl = document.getElementById("score"),
-    linesLbl = document.getElementById("lines"),
-    canvas = document.getElementById("game-canvas"),
-    ctx = canvas.getContext("2d");
-
+    const
+        background = document.getElementById("background"),
+        scoreLbl = document.getElementById("score"),
+        linesLbl = document.getElementById("lines"),
+        canvas = document.getElementById("game-canvas"),
+        ctx = canvas.getContext("2d");
 
     class Tetromino {
         static COLORS = ["blue", "green", "yellow", "red", "orange", "light-blue", "purple"];
@@ -23,7 +23,6 @@ window.onload = () => {
             }
         }
 
-
         update(updFunc) {
             for (let i = 0; i < this.length; ++i) {
                 ctx.clearRect(
@@ -39,17 +38,17 @@ window.onload = () => {
             this.draw();
         }
 
-        draw(){
-            if(!this.img.complete){
+        draw() {
+            if (!this.img.complete) {
                 this.img.onload = () => this.draw();
                 return;
-
             }
-            for(let i=0;i< this.length; ++i){
+            // Print the current tetromine
+            for (let i = 0; i < this.length; ++i) {
                 ctx.drawImage(
-                    this,img,
-                    this.x[i] *Tetromino.BLOCK_SIZE,
-                    this.y[i] *Tetromino.BLOCK_SIZE,
+                    this.img,
+                    this.x[i] * Tetromino.BLOCK_SIZE,
+                    this.y[i] * Tetromino.BLOCK_SIZE,
                     Tetromino.BLOCK_SIZE,
                     Tetromino.BLOCK_SIZE
                 );
@@ -65,8 +64,8 @@ window.onload = () => {
             return false;
         }
 
-        merge(){
-            for (let i=0; i < this.length; ++i){
+        merge() {
+            for (let i = 0; i < this.length; ++i) {
                 FIELD[this.y[i]][this.x[i]] = this.color;
             }
         }
@@ -92,76 +91,78 @@ window.onload = () => {
         }
     }
 
-    const 
-    FIELD_WIDTH = 10, 
-    FIELD_HEIGHT = 20,
-    FIELD = Array.from({length: FIELD_HEIGHT}),
-    MIN_VALID_ROW = 4,
-    TETROMINOES = [
-        new Tetromino([0, 0, 0, 0], [0, 1, 2, 3]),
-        new Tetromino([0, 0, 1, 1], [0, 1, 0, 1]),
-        new Tetromino([0, 1, 1, 1], [0, 0, 1, 2]),
-        new Tetromino([0, 0, 0, 1], [0, 1, 2, 0]),
-        new Tetromino([0, 1, 1, 2], [0, 0, 1, 1]),
-        new Tetromino([0, 1, 1, 2], [1, 1, 0, 1]),
-        new Tetromino([0, 1, 1, 2], [1, 1, 0, 0])   
-
-    ];
+    const
+        FIELD_WIDTH = 10,
+        FIELD_HEIGHT = 20,
+        FIELD = Array.from({ length: FIELD_HEIGHT }),
+        MIN_VALID_ROW = 4,
+        TETROMINOES = [
+            new Tetromino([0, 0, 0, 0], [0, 1, 2, 3]),
+            new Tetromino([0, 0, 1, 1], [0, 1, 0, 1]),
+            new Tetromino([0, 1, 1, 1], [0, 0, 1, 2]),
+            new Tetromino([0, 0, 0, 1], [0, 1, 2, 0]),
+            new Tetromino([0, 1, 1, 2], [0, 0, 1, 1]),
+            new Tetromino([0, 1, 1, 2], [1, 1, 0, 1]),
+            new Tetromino([0, 1, 1, 2], [1, 1, 0, 0])
+        ];
 
     let tetromino = null,
-    delay,
-    score,
-    lines;
+        delay,
+        score,
+        lines;
 
 
-    (function setup(){
+
+    (function setup() {
+
         canvas.style.top = Tetromino.BLOCK_SIZE;
         canvas.style.left = Tetromino.BLOCK_SIZE;
 
         ctx.canvas.width = FIELD_WIDTH * Tetromino.BLOCK_SIZE;
         ctx.canvas.height = FIELD_HEIGHT * Tetromino.BLOCK_SIZE;
 
-
+        // Scale background
         const scale = Tetromino.BLOCK_SIZE / 13.83333333333;
         background.style.width = scale * 166;
         background.style.height = scale * 304;
 
+        // Offset each block to the middle of the table width
         const middle = Math.floor(FIELD_WIDTH / 2);
         for (const t of TETROMINOES) t.x = t.x.map(x => x + middle);
 
         reset();
         draw();
-
-
-
     })();
 
-    function reset(){
-        FIELD.forEach((_,y) => FIELD[y] = Array.from({length:FIELD_WIDTH}).map(_ => false));
+    function reset() {
+        // Make false all blocks
+        FIELD.forEach((_, y) => FIELD[y] = Array.from({ length: FIELD_WIDTH }).map(_ => false));
 
-        ctx.clearRect(0,0,canvas.width,canvas.height);
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
 
         delay = Tetromino.DELAY;
         score = 0;
         lines = 0;
-
     }
 
-    function draw(){
-        if (tetromino){
-            if (tetromino.collides(i=>({x:tetromino.x[i], y:tetromino.y[i]+1}))){
+    function draw() {
+        if (tetromino) {
 
+            // Collision?
+            if (tetromino.collides(i => ({ x: tetromino.x[i], y: tetromino.y[i] + 1 }))) {
                 tetromino.merge();
+                // Prepare for new tetromino
                 tetromino = null;
 
+                // Check for completed rows
                 let completedRows = 0;
-                for (let y = FIELD_HEIGHT-1; y>= MIN_VALID_ROW;--y)
-                    if(FILED[y].every(e => e!==false)){
-                        for (let ay = y; ay >=MIN_VALID_ROW; --ay)
-                        FIELD[ay] = [...FIELD[ay-1]];
+                for (let y = FIELD_HEIGHT - 1; y >= MIN_VALID_ROW; --y)
+                    if (FIELD[y].every(e => e !== false)) {
+                        for (let ay = y; ay >= MIN_VALID_ROW; --ay)
+                            FIELD[ay] = [...FIELD[ay - 1]];
 
                         ++completedRows;
-
+                        // Keep the same row
                         ++y;
                     }
 
@@ -182,50 +183,51 @@ window.onload = () => {
                 }
 
 
-
-            }else
-            tetromino.update(i => ++tetromino.y[i]);
+            } else
+                tetromino.update(i => ++tetromino.y[i]);
         }
+        // No tetromino failing
+        else {
 
-        else{
-            scoreLbl.innerText= score;
+            scoreLbl.innerText = score;
             linesLbl.innerText = lines;
 
-
-            tetromino = (({x,y}, color)=>
-            new Tetromino([...x], [...y], color)
+            // Create random tetromino
+            tetromino = (({ x, y }, color) =>
+                new Tetromino([...x], [...y], color)
             )(
-                TETROMINOES[Math.floor(Math.random()*(TETROMINOES.length -1))],
-                math.floor(Math.random()* (Tetromino.COLORS,length -1))
+                TETROMINOES[Math.floor(Math.random() * (TETROMINOES.length - 1))],
+                Math.floor(Math.random() * (Tetromino.COLORS.length - 1))
             );
+
             tetromino.draw();
         }
+
         setTimeout(draw, delay);
     }
 
+    // Move
     window.onkeydown = event => {
-        switch(event.key){
+        switch (event.key) {
             case "ArrowLeft":
-                if(!tetromino.collides(i => ({x:tetromino.x[i]-1, y:tetromino.y[i]})))
-                tetromino.update(i => --tetromino.x[i]);
-            break;
+                if (!tetromino.collides(i => ({ x: tetromino.x[i] - 1, y: tetromino.y[i] })))
+                    tetromino.update(i => --tetromino.x[i]);
+                break;
             case "ArrowRight":
-                if(!tetromino.collides(i => ({x:tetromino.x[i]+1, y:tetromino.y[i]})))
-                tetromino.update(i => ++tetromino.x[i]);
-            break;
+                if (!tetromino.collides(i => ({ x: tetromino.x[i] + 1, y: tetromino.y[i] })))
+                    tetromino.update(i => ++tetromino.x[i]);
+                break;
             case "ArrowDown":
-                delay = Tetromino.delay / Tetromino.DELAY_INCREASED;
-            break;
+                delay = Tetromino.DELAY / Tetromino.DELAY_INCREASED;
+                break;
             case " ":
                 tetromino.rotate();
                 break;
-
         }
     }
-
     window.onkeyup = event => {
         if (event.key === "ArrowDown")
-        delay = Tetromino.DELAY;
-
+            delay = Tetromino.DELAY;
     }
+
 }
